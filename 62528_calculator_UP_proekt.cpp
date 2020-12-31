@@ -39,6 +39,49 @@ bool CorrectInputData(char str[])         //write a function that will check if 
         return true;
 }
 
+bool CorrectSequenceOfSymbols(char str[])        //write a function that will check if the order of the symbols is correct
+{
+    if(str[0]=='+' || str[0]=='-' || str[0]=='*' || str[0]=='/' || str[0]==')' || str[0]=='^') return false;
+    //the first symbol cannot be an operation (because every operation need two operands - one before it and one after it); '(' is an exception
+
+    if(str[LengthOfString(str)-1]=='+' || str[LengthOfString(str)-1]=='-' || str[LengthOfString(str)-1]=='*' || str[LengthOfString(str)-1]=='/'
+       || str[LengthOfString(str)-1]=='(' || str[LengthOfString(str)-1]=='^') return false;
+    //and the last symbol of the string cannot be an operation as well; here ')' is the exception
+
+    for(int i=0;i<LengthOfString(str);i++)
+    {
+        if(str[i]>='0' && str[i]<='9')
+        {//if the symbol is a digit between 0 and 9, it could be followed either by an interval or an operation (+,-,...)
+
+            int m=i;
+            if(str[i+1]>='0' && str[i+1]<='9')   //here, check to see if a digit is followed by more digits
+            {
+                for(m=i+1;str[m]>='0' && str[m]<='9';m++);        //use another variable "m" which will increase the times a digit is found right next to the first one found
+            }
+            i=m;   //by doing this, it's like we just skip all digits that are next to one another (obviously, because they compose a multi-digit number)
+
+            int j;
+            for(j=i+1;str[j]==' ';j++);     //when a symbol different than an interval is encountered:
+            if(str[j]>='0' && str[j]<='9') return false;     //if that symbol is again a digit, this means the read data is unallowed
+        }
+    }
+
+    for(int i=0;i<LengthOfString(str);i++)   //the same here, but with the operations
+    {
+        if(str[i]=='+' || str[i]=='-' || str[i]=='*' || str[i]=='/' || str[i]=='^')
+        {//if the symbol is an operation, it could be followed either by an interval or a digit (0-9)
+            int j;
+            for(j=i+1;str[j]==' ';j++);
+            if(str[j]=='+' || str[j]=='-' || str[j]=='*' || str[j]=='/' || str[j]=='^')
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;   //eventually, if nothing illegal is found, return true (thus the character sequence can be calculated)
+}
+
 int main()
 {
     const int MAX_SIZE=10000;      //initialize a big enough constant variable that will serve as the maximum size of the read string from the file
@@ -55,7 +98,11 @@ int main()
         if(not CorrectInputData(str)) cout<<"NaN"<<endl;       //firstly, use the aforeimplemented function to check for illegal symbols
         else      //if no such symbols are found:
         {
-
+            if(not CorrectSequenceOfSymbols(str)) cout<<"NaN"<<endl;
+            else
+            {
+                cout<<"sure"<<endl;
+            }
         }
 
     }
