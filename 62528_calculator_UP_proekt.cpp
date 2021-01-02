@@ -236,20 +236,48 @@ void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main fun
                 }
 
                 int decimalPointPosition=(leftBorder+rightBorder)/2;   //place the decimal point exactly at the middle of the whole occupied space from the two operands and the operation
+                int decimalPointPositionSec = decimalPointPosition;
                 str[decimalPointPosition]='.';
-          //add more spaces (to be done)
-                int numlen=LengthOfNumber(result);
-                int wholePart=result;
-                int multiplier=10;
-                int currentLastDigit=0;
 
-                while(wholePart>0)
+                int numlen=LengthOfNumber(result);     //initialize a variable that will serve as the length of the number(the number of digits is in)
+                int wholePart=result;                 //take out the integer part (every digit before the decimal point)
+                int multiplier=10;                   //use a multiplier variable, in order to move the decimal point to the right each iteration
+                int currentLastDigit=0;             //and one more variable for the digit, we're currently on
+
+                if(wholePart==0)
                 {
-                    decimalPointPosition--;
-                    currentLastDigit = wholePart%10;
-                    wholePart /= 10;
-                    str[decimalPointPosition]=currentLastDigit + '0';
+                    str[decimalPointPosition-1]=wholePart%10+'0';
                 }
+                while(wholePart>0)                 //the integer part will get its last digit removed each iteration, so the condition is - while it it anything bigger than zero
+                {
+                    decimalPointPosition--;                  //we have to add those elements to the left of the decimal point (i.e. before the decimal point)
+                    currentLastDigit = wholePart%10;         //take out the currently last digit
+                    wholePart /= 10;
+                    str[decimalPointPosition]=currentLastDigit + '0';     //and place that taken digit right to the decimal point (after that - right next to the previous last digit)
+                }
+
+                int countOfIntegerPartDigits;               //variables say enough by their names
+                countOfIntegerPartDigits = LengthOfNumber((int)result);
+                int countOfDigitsAfterDecimalPoint;         //that't the variable we're going to use to see how many digits are there after the decimal point
+                countOfDigitsAfterDecimalPoint = numlen - countOfIntegerPartDigits; //when we subtract the count of the digits before the point from the count of all digits, we get the count of these that stand after the point
+
+                double decimalWithRightShiftedPoint = result;      //use another variable that will initially begin as a real number
+                int currentDigitOfDecimal;       //and declare other variable that will serve to operate with the digit we're currently on (equivalent variable to the "currentDigit" and "currentLastDigit" ones)
+
+                if((int)result==result)          //before the process, just check if there are actually no digits after the decimal point (i.e. the decimal is an integer)
+                {
+                    str[decimalPointPositionSec+1]='0';   //and just put one 0 after the point (ex.: 15.0)
+                }
+
+                while(countOfDigitsAfterDecimalPoint>0)   //otherwise, when there are digits after the decimal point:
+                {//do identical algorithm to the one that placed the digits before the decimal point, it's just mirrored
+                    decimalPointPositionSec++;   //starting right after the place of the decimal point
+                    decimalWithRightShiftedPoint *= 10;   //each iteration move the decimal point to the right once
+                    currentDigitOfDecimal = (int)decimalWithRightShiftedPoint % 10;     //and extract the last digit of the newly-former decimal number (of course, cast it to type int in order to use "%" operation)
+                    countOfDigitsAfterDecimalPoint--;     //and therefore the count of the actual digits after the decimal point decreases each iteration
+                    str[decimalPointPositionSec]=currentDigitOfDecimal + '0';   //at the end, place that extracted number right after the decimal point (after the first iteration - place it right next to the previously last digit)
+                }
+
             }
 
 
