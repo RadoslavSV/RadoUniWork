@@ -61,7 +61,7 @@ bool CorrectSequenceOfSymbols(char str[])        //write a function that will ch
             }
             i=m;   //by doing this, it's like we just skip all digits that are next to one another (obviously, because they compose a multi-digit number)
 
-            if(str[i]=='+' || str[i]=='-' || str[i]=='*' || str[i]=='/' || str[i]=='*') i--;
+            if(str[i]=='+' || str[i]=='-' || str[i]=='*' || str[i]=='/' || str[i]=='^') i--;
             //in the case where the operation is right after the number, that index should be decreased once, in order not to count the symbol for operation as the last digit of the number
 
             int j;
@@ -107,53 +107,50 @@ int LengthOfNumber(double num)     //write a function that returns the number of
     else return count;          //in the general case, return the counter
 }
 
-void CalculateTheExpression(char str[])
+void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main function in our program that will calculate the whole arithmetical expression
 {
-    for(int i=0;i<LengthOfString(str);i++)
+    for(int i=0;i<LengthOfString(str);i++)                    //begin by going through the whole string (from the 0 index to the last one (LengthOfString-1))
     {
-        if(str[i]=='*' || str[i]=='/' || str[i]=='^')
-        {
-            int j;
+        if(str[i]=='*' || str[i]=='/' || str[i]=='^')         //the three operations that have priority are multiplication, division and exponentiation
+        {//so whenever one of these three operations is found do the following:
+            int j;           //use an index "j" that will move as many times as there are intervals between the operation and the right operand
             for(j=i+1;str[j]==' ';j++);
 
-            int m=j;
+            int m=j;         //now, use an index "m" that will move as many times as there are digits in the right operand (starting from the place of "j", of course)
             if(str[j+1]>='0' && str[j+1]<='9')
             {
                 for(m=j+1;str[m]>='0' && str[m]<='9';m++);
             }
-            else m=j+1;
+            else m=j+1;      //if not, this means that the found number is only one digit, therefore "m" increases just once
 
-            int rightBorder=m-1;
+            int rightBorder=m-1;     //use a variable for the right border here (used later in code), that is exactly where the right operand/number ends (where its last digit it situated)
 
-            long long actualRightNumber=0;
-            int currentDigit=0;
-            int multiplier=1;
-            do
+            long long actualRightNumber=0;    //define a variable that will serve as the "actual" right operand
+            int currentDigit=0;              //one variable for each current digit that we are processing
+            int multiplier=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+            do                             //use a do-while operator, because we need at least one iteration
             {
-                currentDigit = str[m-1] - '0';
-                actualRightNumber += currentDigit * multiplier;
-                multiplier *= 10;
-                m--;
+                currentDigit = str[m-1] - '0';      //extract the last digit, beginning from the very last
+                actualRightNumber += currentDigit * multiplier;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                multiplier *= 10;        //the multiplier multiplies by 10 each iteration
+                m--;                    //and "m" has to decrease once, since the last digit is already removed
 
-            }while(m>j);
+            }while(m>j);               //the whole process continues, until the first digit of the found number is reached
 
-
+    ///from here below the process is absolutely identical. It is just the mirrored counterpart of the situation above
             int l;
-            for(l=i-1;str[l]==' ';l--);
+            for(l=i-1;str[l]==' ';l--);    //that index starts from the place of the operation and decreases instead of increase as long as there are intervals
 
             int n=l;
-            if(str[l-1]>='0' && str[l-1]<='9')
+            if(str[l-1]>='0' && str[l-1]<='9')     //again, when a number is found it is counted how many digits it contains
             {
                 for(n=l-1;str[n]>='0' && str[n]<='9';n--);
             }
             else n=l-1;
 
-            int leftBorder=n+1;
+            int leftBorder=n+1;       //define the left border as well (again used later)
 
-            int lengthOfNumber=l-n;
-
-
-            long long actualLeftNumber=0;
+            long long actualLeftNumber=0;    //and with the same algorithm form the actual left operand here
             int currentDigitLeft=0;
             int multiplierLeft=1;
             do
@@ -164,33 +161,61 @@ void CalculateTheExpression(char str[])
                 l--;
 
             }while(l>n);
+    ///until here
 
-            if(str[i]=='*')
+         if(str[i]=='*')                 //now, if the found operation is multiplication:
             {
-                double result=0;
-                result = (double)actualLeftNumber*(double)actualRightNumber;
+                int result=0;            //use a variable that will serve to show the final result of the operation
+                result = actualLeftNumber*actualRightNumber;      //just multiply the left and the right operands
 
-                cout<<LengthOfNumber(result)<<endl;
+                for(int I=leftBorder;I<=rightBorder;I++)
+                {//after the multiplication is done, make all spaces, that are occupied by the operation and the two operands, simply an interval (it's like they become empty)
+                    str[I]=' ';
+                }
+
+                int numlen=LengthOfNumber(result);       //use the aforewritten function to give value of a new variable "numlen"
+                while(numlen>0)                         //will decrease that variable each iteration, until it becomes zero
+                {
+                    str[rightBorder] = result%10 + '0';    //the rightmost container will receive the char of the corresponding digit (that's why we add '0' (or 48))
+                    result /= 10;                         //the result number has its last digit removed
+                    rightBorder--;                       //decrease the right border
+                    numlen--;                           //and the length of the number
+                }//now, the number is input into the original string, replacing the operation and the operands and all other spaces previously occupied by them have become intervals
 
             }
-            if(str[i]=='/')
+    ///the algorithm is identical here, just the operation is exponentiation
+         if(str[i]=='^')
             {
-                double result=0;
-                result = (double)actualLeftNumber/(double)actualRightNumber;
-                cout<<LengthOfNumber(result)<<endl;
+                int result=0;
+                result = pow((double)actualLeftNumber,(int)actualRightNumber);      //cast the base to double and the exponent to int
 
-            }
-            if(str[i]=='^')
-            {
-                double result=0;
-                result = pow((double)actualLeftNumber,(double)actualRightNumber);
-                cout<<LengthOfNumber(result)<<endl;
+                for(int I=leftBorder;I<=rightBorder;I++)
+                {
+                    str[I]=' ';
+                }
 
+                int numlen=LengthOfNumber(result);
+                while(numlen>0)
+                {
+                    str[rightBorder] = result%10 + '0';
+                    result /= 10;
+                    rightBorder--;
+                    numlen--;
+                }
             }
+    ///until here
+
+//            if(str[i]=='/')
+//            {
+//                double result=0;
+//                result = (double)actualLeftNumber/(double)actualRightNumber;
+//
+//            }
+
 
         }
     }
-//cout<<str;
+               cout<<str;//test
 }
 
 int main()
@@ -212,7 +237,7 @@ int main()
             if(not CorrectSequenceOfSymbols(str)) cout<<"NaN"<<endl;   //secondly, use the function that checks if the order of the read symbols is possible
             else
             {
-                CalculateTheExpression(str);
+                CalculateTheArithmeticalExpression(str);
             }
         }
 
