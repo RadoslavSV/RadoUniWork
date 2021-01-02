@@ -183,8 +183,8 @@ void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main fun
                 }//now, the number is input into the original string, replacing the operation and the operands and all other spaces previously occupied by them have become intervals
 
             }
-    ///the algorithm is identical here, just the operation is exponentiation
-         if(str[i]=='^')
+
+         if(str[i]=='^')        //if the operation is exponentitation
             {
                 int result=0;
                 result = pow((double)actualLeftNumber,(int)actualRightNumber);      //cast the base to double and the exponent to int
@@ -194,23 +194,63 @@ void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main fun
                     str[I]=' ';
                 }
 
-                int numlen=LengthOfNumber(result);
-                while(numlen>0)
+                if(rightBorder-leftBorder+1<LengthOfNumber(result))        //here, check to see if the needed space for the result number is actually bigger than the space provided (ex. 9^6 = 531441)
                 {
-                    str[rightBorder] = result%10 + '0';
-                    result /= 10;
-                    rightBorder--;
-                    numlen--;
+                    int difference=LengthOfNumber(result)-(rightBorder-leftBorder);       //define a variable that calculates the difference which is how many more spaces we need
+                    for(int q=LengthOfString(str)-1+difference;q>leftBorder;q--)
+                    {//"shift" the whole string to the right exactly that much spaces
+                        str[q]=str[q-difference];
+                    }
+                    rightBorder += difference;   //the right border changes as well
+
+                    int numlen=LengthOfNumber(result);  //and then do the usual conversion into char and write it in the string
+                    while(numlen>0)
+                    {
+                        str[rightBorder] = result%10 + '0';
+                        result /= 10;
+                        rightBorder--;
+                        numlen--;
+                    }
+                }
+                else       //if the space is enough just do the conversion without adding additional spaces
+                {
+                    int numlen=LengthOfNumber(result);
+                    while(numlen>0)
+                    {
+                        str[rightBorder] = result%10 + '0';
+                        result /= 10;
+                        rightBorder--;
+                        numlen--;
+                    }
                 }
             }
-    ///until here
 
-//            if(str[i]=='/')
-//            {
-//                double result=0;
-//                result = (double)actualLeftNumber/(double)actualRightNumber;
-//
-//            }
+         if(str[i]=='/')      //if the operation is division
+            {
+                double result=0;
+                result = (double)actualLeftNumber/(double)actualRightNumber;     //cast the two numbers to double,because the result could be a decimal number
+
+                for(int I=leftBorder;I<=rightBorder;I++)       //again, make all spaces from the beginning of the left operant to the end of the right operand, empty
+                {
+                    str[I]=' ';
+                }
+
+                int decimalPointPosition=(leftBorder+rightBorder)/2;   //place the decimal point exactly at the middle of the whole occupied space from the two operands and the operation
+                str[decimalPointPosition]='.';
+          //add more spaces (to be done)
+                int numlen=LengthOfNumber(result);
+                int wholePart=result;
+                int multiplier=10;
+                int currentLastDigit=0;
+
+                while(wholePart>0)
+                {
+                    decimalPointPosition--;
+                    currentLastDigit = wholePart%10;
+                    wholePart /= 10;
+                    str[decimalPointPosition]=currentLastDigit + '0';
+                }
+            }
 
 
         }
