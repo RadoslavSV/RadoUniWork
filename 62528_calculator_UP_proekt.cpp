@@ -107,8 +107,8 @@ int LengthOfNumber(double num)     //write a function that returns the number of
     else return count;          //in the general case, return the counter
 }
 
-void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main function in our program that will calculate the whole arithmetical expression
-{
+void CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(char str[])
+{//the first of the two biggest functions is going to be the one that calculates all multiplications, divisions and exponentiations (since they have priority before adding and subtracting)
     for(int i=0;i<LengthOfString(str);i++)                    //begin by going through the whole string (from the 0 index to the last one (LengthOfString-1))
     {
         if(str[i]=='*' || str[i]=='/' || str[i]=='^')         //the three operations that have priority are multiplication, division and exponentiation
@@ -160,8 +160,9 @@ void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main fun
                 multiplierLeft *= 10;
                 l--;
 
-            }while(l>n);
-    ///until here
+            }while(l>n);     ///now we have turned both the left and the right operands from sequence of symbols into numbers
+
+    ///from here below, the operations begin
 
          if(str[i]=='*')                 //now, if the found operation is multiplication:
             {
@@ -279,11 +280,179 @@ void CalculateTheArithmeticalExpression(char str[])           //Biggest/Main fun
                 }
 
             }
-
-
         }
     }
-               cout<<str;//test
+}
+
+void CalculateAdditionAndSubtractionInTheArithmeticalExpression(char str[])
+{
+    for(int i=0;i<LengthOfString(str);i++)     //begin by going through the whole string (from the 0 index to the last one (LengthOfString-1))
+    {
+        if(str[i]=='+' || str[i]=='-')
+        {
+            int j;        //use an index "j" that will move as many times as there are intervals between the operation and the right operand
+            for(j=i+1;str[j]==' ';j++);
+
+            int m=j;         //now, use an index "m" that will move as many times as there are digits in the right operand (starting from the place of "j", of course)
+            bool isDecimal=false;    //it's important to know if the number is a decimal or an integer
+            int dotPosition=0;
+            if((str[j+1]>='0' && str[j+1]<='9') || str[j+1]=='.')
+            {
+                for(m=j+1;(str[m]>='0' && str[m]<='9') || str[m]=='.';m++)
+                {
+                    if(str[m]=='.')
+                    {
+                        isDecimal=true;      //if the "dot" symbol is found, then the number is a decimal
+                        dotPosition=m;
+                    }
+                }
+            }
+            else m=j+1;      //if not, this means that the found number is only one digit, therefore "m" increases just once
+
+            int rightBorder=m-1;     //use a variable for the right border here (used later in code), that is exactly where the right operand/number ends (where its last digit it situated)
+
+            if(not isDecimal)
+            {
+                long long actualRightNumber=0;    //define a variable that will serve as the "actual" right operand
+                int currentDigit=0;              //one variable for each current digit that we are processing
+                int multiplier=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+                do                             //use a do-while operator, because we need at least one iteration
+                {
+                    currentDigit = str[m-1] - '0';      //extract the last digit, beginning from the very last
+                    actualRightNumber += currentDigit * multiplier;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                    multiplier *= 10;        //the multiplier multiplies by 10 each iteration
+                    m--;                    //and "m" has to decrease once, since the last digit is already removed
+
+                }while(m>j);
+            }
+
+            else
+            {
+                long long actualRightNumberAfterDot=0;    //define a variable that will serve as the "actual" right operand
+                int currentDigit=0;              //one variable for each current digit that we are processing
+                int multiplier=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+                do                             //use a do-while operator, because we need at least one iteration
+                {
+                    currentDigit = str[m-1] - '0';      //extract the last digit, beginning from the very last
+                    actualRightNumberAfterDot += currentDigit * multiplier;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                    multiplier *= 10;        //the multiplier multiplies by 10 each iteration
+                    m--;                    //and "m" has to decrease once, since the last digit is already removed
+                }while(m>dotPosition+1);
+
+                int m2=m-1;
+                long long actualRightNumberBeforeDot=0;
+                int currentDigit2=0;              //one variable for each current digit that we are processing
+                int multiplier2=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+                do                             //use a do-while operator, because we need at least one iteration
+                {
+                    currentDigit2 = str[m2-1] - '0';      //extract the last digit, beginning from the very last
+                    actualRightNumberBeforeDot += currentDigit2 * multiplier2;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                    multiplier2 *= 10;        //the multiplier multiplies by 10 each iteration
+                    m2--;                    //and "m" has to decrease once, since the last digit is already removed
+                }while(m2>j);
+
+                double actualRightNumber=0;
+                actualRightNumber += actualRightNumberBeforeDot;
+
+                double actualRightNumberAfterDotDouble = actualRightNumberAfterDot;
+                int numb;
+                do
+                {
+                    actualRightNumberAfterDotDouble /= 10;
+                    numb = actualRightNumberAfterDotDouble;
+                }while(numb>0);
+
+                actualRightNumber += actualRightNumberAfterDotDouble;
+            }
+            ///now we have the right operands calculated (in both cases - integer or decimal)
+
+
+            int l;
+            for(l=i-1;str[l]==' ';l--);    //that index starts from the place of the operation and decreases instead of increase as long as there are intervals
+
+            int n=l;
+            bool isDecimalLeft=false;
+            int dotPositionLeft=0;
+            if((str[l-1]>='0' && str[l-1]<='9') || str[l-1]=='.')     //again, when a number is found it is counted how many digits it contains
+            {
+                for(n=l-1;(str[n]>='0' && str[n]<='9') || str[n]=='.';n--)
+                {
+                    if(str[n]=='.')
+                    {
+                        isDecimalLeft=true;      //if the "dot" symbol is found, then the number is a decimal
+                        dotPositionLeft=n;
+                    }
+                }
+            }
+            else n=l-1;
+
+            int leftBorder=n+1;       //define the left border as well (again used later)
+
+            if(not isDecimalLeft)
+            {
+                long long actualLeftNumber=0;    //and with the same algorithm form the actual left operand here
+                int currentDigitLeft=0;
+                int multiplierLeft=1;
+                do
+                {
+                    currentDigitLeft = str[l] - '0';
+                    actualLeftNumber += currentDigitLeft * multiplierLeft;
+                    multiplierLeft *= 10;
+                    l--;
+
+                }while(l>n);
+
+            }
+
+
+            else
+            {
+                long long actualLeftNumberAfterDot=0;    //define a variable that will serve as the "actual" right operand
+                int currentDigitLeft=0;              //one variable for each current digit that we are processing
+                int multiplierLeft=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+                do                             //use a do-while operator, because we need at least one iteration
+                {
+                    currentDigitLeft = str[l] - '0';      //extract the last digit, beginning from the very last
+                    actualLeftNumberAfterDot += currentDigitLeft * multiplierLeft;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                    multiplierLeft *= 10;        //the multiplier multiplies by 10 each iteration
+                    l--;                    //and "m" has to decrease once, since the last digit is already removed
+                }while(l>dotPositionLeft);
+
+                int m2Left=l;
+                l=leftBorder;
+                long long actualLeftNumberBeforeDot=0;
+                int currentDigit2Left=0;              //one variable for each current digit that we are processing
+                int multiplier2Left=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+                do                             //use a do-while operator, because we need at least one iteration
+                {
+                    currentDigit2Left = str[m2Left-1] - '0';
+                    actualLeftNumberBeforeDot += currentDigit2Left * multiplier2Left;
+                    multiplier2Left *= 10;
+                    m2Left--;
+                }while(m2Left>l);
+
+                double actualLeftNumber=0;
+                actualLeftNumber += actualLeftNumberBeforeDot;
+
+                double actualLeftNumberAfterDotDouble = actualLeftNumberAfterDot;
+                int numbLeft;
+                do
+                {
+                    actualLeftNumberAfterDotDouble /= 10;
+                    numbLeft = actualLeftNumberAfterDotDouble;
+                }while(numbLeft>0);
+
+
+                actualLeftNumber += actualLeftNumberAfterDotDouble;
+
+                ///now we have all the left operands calculated (in both cases - integer or decimal)
+
+
+            ///what's left to do: the operations '+' and '-'
+
+            }
+        }
+    }
 }
 
 int main()
@@ -305,7 +474,9 @@ int main()
             if(not CorrectSequenceOfSymbols(str)) cout<<"NaN"<<endl;   //secondly, use the function that checks if the order of the read symbols is possible
             else
             {
-                CalculateTheArithmeticalExpression(str);
+                CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(str);
+                cout<<str<<endl;
+                CalculateAdditionAndSubtractionInTheArithmeticalExpression(str);
             }
         }
 
