@@ -490,6 +490,7 @@ int main()
     const int MAX_SIZE=10000;      //initialize a big enough constant variable that will serve as the maximum size of the read string from the file
     char str[MAX_SIZE];            //define a character sequence that will be read from the .txt file
     ifstream arithmeticalExpression;         //input stream class to operate on files - "arithmeticalExpression" so we can read the written arithmetical expression from a file
+    //the name of the file is "test2.txt", it could be changed to <anything>.txt
     arithmeticalExpression.open("test2.txt",ios::in);         //open the .txt file
     if(!arithmeticalExpression)               //initially, check if the program was able to open the file
     {
