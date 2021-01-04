@@ -107,6 +107,92 @@ int LengthOfNumber(double num)     //write a function that returns the number of
     else return count;          //in the general case, return the counter
 }
 
+bool AreThereAdditionOrSubtractionInTheExpression(char str[])     //write a function that return a bool value whether or not there are addition and/or subtraction in the expression
+{
+    for(int i=0;i<LengthOfString(str);i++)
+    {
+        if(str[i]=='+' || str[i]=='-') return true;     //if just one '+' and/or '-' symbol is found, it's enough to conclude that there are addition/subtraction
+    }
+    return false;
+}
+
+void CalculateONLYMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(char str[])   //write a function that will be needed only in the cases where there are no '+' and '-' in the expression
+{//initially, we have to extract the very first number
+        int beginning=0;    //start from the very beginning, i.e. the 0th place
+        if(str[beginning]==' ')
+        {
+            for(;str[beginning]==' ';beginning++);   //the beginning should be where the actual first digit is found (from there starts the number)
+        }
+        int ending=beginning; //ending starting from the beginning
+        if(str[beginning+1]>='0'&&str[beginning+1]<='9')  //only if there are more digits right after the first digits, the number is bigger
+        {
+            for(ending=beginning;str[ending]>='0'&&str[ending]<='9';ending++);   //until digits are found next to one another, increase the ending
+            ending--;   //at the end ending, will have gone one space too far, so we decrease it to make it point right to the last digit of the number (i.e. where the number terminates)
+        }
+
+        int firstNumber=0;  //this variable will be used to take out the first number in the string
+        int thisDigit=0;   //"currentDigit" variable
+        int raiser=1;  //"multiplier" variable
+        do
+        {
+            thisDigit = str[ending] - '0';   //convert the last digit from char to int
+            firstNumber += thisDigit*raiser;   //add it to the total
+            raiser *= 10;   //increase the raiser
+            ending--;   //and decrease the ending, so it will go down one by one iteration until it reaches the beginning of the number
+        }while(ending>=beginning);
+
+        double result=firstNumber;     //the result receives that firstNumber because it has to start from somewhere
+
+
+
+    for(int i=0;i<LengthOfString(str);i++)                    //begin by going through the whole string (from the 0 index to the last one (LengthOfString-1))
+    {
+        if(str[i]=='*' || str[i]=='/' || str[i]=='^')         //the three operations that have priority are multiplication, division and exponentiation
+        {//so whenever one of these three operations is found do the following:
+            int j;           //use an index "j" that will move as many times as there are intervals between the operation and the right operand
+            for(j=i+1;str[j]==' ';j++);
+
+            int m=j;         //now, use an index "m" that will move as many times as there are digits in the right operand (starting from the place of "j", of course)
+            if(str[j+1]>='0' && str[j+1]<='9')
+            {
+                for(m=j+1;str[m]>='0' && str[m]<='9';m++);
+            }
+            else m=j+1;      //if not, this means that the found number is only one digit, therefore "m" increases just once
+
+            long long actualRightNumber=0;    //define a variable that will serve as the "actual" right operand
+            int currentDigit=0;              //one variable for each current digit that we are processing
+            int multiplier=1;               //and one multiplier which will serve to form the number as a whole just by its digits
+            do                             //use a do-while operator, because we need at least one iteration
+            {
+                currentDigit = str[m-1] - '0';      //extract the last digit, beginning from the very last
+                actualRightNumber += currentDigit * multiplier;   //add that digit to the new-forming number multiplied by 1, then 10, then 100 and so on...
+                multiplier *= 10;        //the multiplier multiplies by 10 each iteration
+                m--;                    //and "m" has to decrease once, since the last digit is already removed
+
+            }while(m>j);              //the whole process continues, until the first digit of the found number is reached
+
+            //now just execute the corresponding operations, according to the found operator, with each right operand (actualRightNumber)
+            if(str[i]=='*')
+            {
+                result *= actualRightNumber;
+            }
+            else
+            if(str[i]=='/')
+            {
+                result /= actualRightNumber;
+
+            }
+            else
+            if(str[i]=='^')
+            {
+                result = pow(result,(int)actualRightNumber);
+            }
+
+        }
+    }
+    cout<<result<<endl;   //print the final result
+}
+
 void CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(char str[])
 {//the first of the two biggest functions is going to be the one that calculates all multiplications, divisions and exponentiations (since they have priority before adding and subtracting)
     for(int i=0;i<LengthOfString(str);i++)                    //begin by going through the whole string (from the 0 index to the last one (LengthOfString-1))
@@ -285,9 +371,9 @@ void CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpres
 }
 
 void CalculateAdditionAndSubtractionInTheArithmeticalExpression(char str[])
-{
-    double result=0;
-    double FirstLeftOperand=0;
+{//the other biggest function is the one that calculates addition and subtraction (after the string contains only these two operation (the others have already been calculated by the foregoing function))
+    double result=0;        //define the variable that will serve as the final result (all operations are going to happen in it)
+    double FirstLeftOperand=0;   //define a variable that will receive the value of the very first number (i.e. the first left operand)
 
     for(int i=0;str[i]!='+' && str[i]!='-';i++)
     {
@@ -466,18 +552,15 @@ void CalculateAdditionAndSubtractionInTheArithmeticalExpression(char str[])
             }
             ///now we have the right operands calculated (in both cases - integer or decimal)
 
-        //add every calculated right operand to the initial "result" variable with its corresponding operator (+/-) which stands before it
-        if(str[i]=='+')
-        {
-            result += actualRightOperand;
-        }
-        if(str[i]=='-')
-        {
-            result -= actualRightOperand;
-        }
-
-
-
+            //add every calculated right operand to the initial "result" variable with its corresponding operator (+/-) which stands before it
+            if(str[i]=='+')
+            {
+                result += actualRightOperand;
+            }
+            if(str[i]=='-')
+            {
+                result -= actualRightOperand;
+            }
 
         }
     }
@@ -504,16 +587,24 @@ int main()
         {
             if(not CorrectSequenceOfSymbols(str)) cout<<"NaN"<<endl;   //secondly, use the function that checks if the order of the read symbols is possible
             else    //if the order is possible:
-            {
-                CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(str);    //first use the function that calculated multiplication, division and exponentiation (since they have priority)
-                CalculateAdditionAndSubtractionInTheArithmeticalExpression(str);    //and then use the function that calculates addition and subtraction
-                //the latter function prints the definitive result, as well
+            {   //use if operator to separate the two cases - when the expression has only multiplication, division and/or exponentiation in it...
+                if(not AreThereAdditionOrSubtractionInTheExpression(str))
+                {   //use the function that calculates ONLY multiplication, division and exponentitation
+                    CalculateONLYMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(str);
+                    //the function prints the final result, as well
+                }
+                else//...and when the expression has at least one addition or subtraction
+                {   //first use the function that calculates multiplication, division and exponentiation (since they have priority); if none are found, that does not change anything
+                    CalculateMultiplicationAndDivisionAndExponentitationInTheArithmeticalExpression(str);
+                    //and then use the function that calculates addition and subtraction
+                    CalculateAdditionAndSubtractionInTheArithmeticalExpression(str);
+                    //the latter function prints the definitive result, as well
+                }
             }
         }
-
     }
 
-    arithmeticalExpression.close();           //at the end, close the file that has been read
+    arithmeticalExpression.close();           //at the end, close the file that has been opened
 
 
     return 0;
